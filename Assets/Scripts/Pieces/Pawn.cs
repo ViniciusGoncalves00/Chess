@@ -1,50 +1,67 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Assertions.Comparers;
 
 namespace Pieces
 {
     public class Pawn : Piece
     {
-        public override Vector2Int[] MovementPossibilities(int x, int y)
+        public int Direction;
+        
+        private Vector2Int _position;
+        private readonly Vector2Int _oneForward = new Vector2Int(0, 1);
+        private readonly Vector2Int _twoForward = new Vector2Int(0, 2);
+        private readonly Vector2Int _leftForward = new Vector2Int(-1, 1);
+        private readonly Vector2Int _rightForward = new Vector2Int(1, 1);
+
+        private Vector2Int _oneForwardPosition;
+        private Vector2Int _twoForwardPosition;
+        private Vector2Int _leftForwardPosition;
+        private Vector2Int _rightForwardPosition;
+        
+        public override Vector2Int[] MovementPossibilities(Vector2Int position)
         {
             var array = new List<Vector2Int>();
+            
+            _position = position;
+            _oneForwardPosition = _position + new Vector2Int(_oneForward.x, _oneForward.y * Direction);
+            _twoForwardPosition = _position + new Vector2Int(_twoForward.x, _twoForward.y * Direction);
+            _leftForwardPosition = _position + new Vector2Int(_leftForward.x, _leftForward.y * Direction); 
+            _rightForwardPosition = _position + new Vector2Int(_rightForward.x, _rightForward.y * Direction);
 
-            if (ValidIndex(x, y, 0, 1) && Board.Nodes[x, y + 1].IsEmpty)
+            if (ValidMovement(_oneForwardPosition) && Board.GetNode(_oneForwardPosition).HasPiece() == false)
             {
-                var item = new Vector2Int(x, y + 1);
-                array.Add(item);
+                array.Add(_oneForwardPosition);
             }
-            if (ValidIndex(x, y, 0, 2) && Board.Nodes[x, y + 2].IsEmpty)
+            if (ValidMovement(_twoForwardPosition) && Board.GetNode(_oneForwardPosition).HasPiece() == false && Board.GetNode(_twoForwardPosition).HasPiece() == false)
             {
-                var item = new Vector2Int(x, y + 2);
-                array.Add(item);
+                array.Add(_twoForwardPosition);
             }
-            if (ValidIndex(x, y, -1, 1) && Board.Nodes[x - 1, y + 1].IsEmpty == false)
+            if (ValidMovement(_leftForwardPosition) && Board.GetNode(_leftForwardPosition).HasPiece())
             {
-                var item = new Vector2Int(x - 1, y + 1);
-                array.Add(item);
+                array.Add(_leftForwardPosition);
             }
-            if (ValidIndex(x, y, 1, 1) && Board.Nodes[x + 1, y + 1]!.IsEmpty == false)
+            if (ValidMovement(_rightForwardPosition) && Board.GetNode(_rightForwardPosition).HasPiece())
             {
-                var item = new Vector2Int(x + 1, y + 1);
-                array.Add(item);
+                array.Add(_rightForwardPosition);
             }
 
             return array.ToArray();
         }
         
+        // public override void Move(Vector3Int movement)
+        // {
+        //     gameObject.transform.position = movement;
+        // }
+        
         public override void Move()
         {
             throw new System.NotImplementedException();
         }
-        public override bool ValidIndex(int x, int y, int xValue, int yValue)
+        
+        public override bool ValidMovement(Vector2Int possibleMovement)
         {
-            var xIndex = x + xValue;
-            var yIndex = y + yValue;
-
-            return xIndex is >= 0 and <= 7 &&
-                   yIndex is >= 0 and <= 7;
+            return possibleMovement.x is >= 0 and <= 7 &&
+                   possibleMovement.y is >= 0 and <= 7;
         }
     }
 }

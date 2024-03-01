@@ -7,7 +7,8 @@ public class Board : MonoBehaviour
     [SerializeField] private Transform _parent;
     [SerializeField] private Node _prefab;
 
-    [SerializeField] private Pawn _pawn;
+    [SerializeField] private Pawn _pawnWhite;
+    [SerializeField] private Pawn _pawnBlack;
     [SerializeField] private Rook _rook;
     [SerializeField] private Knight _knight;
     [SerializeField] private Bishop _bishop;
@@ -18,10 +19,13 @@ public class Board : MonoBehaviour
 
     private Node _previousSelectedNode;
     private Node _currentSelectedNode;
+    private Piece _selectedPiece;
+    private Vector2Int _selectedPiecePosition;
+    private bool _hasSelectedPiece;
 
     private readonly List<Vector2Int> _possibleMoves = new List<Vector2Int>();
 
-    public static readonly Node[,] Nodes = new Node[8, 8];
+    private static readonly Node[,] Nodes = new Node[8, 8];
 
     private void Start()
     {
@@ -43,29 +47,73 @@ public class Board : MonoBehaviour
                 {
                     case > 1 and < 6:
                         break;
-                    case 1 or 6:
-                        SpawnPiece(_pawn, x, y);
-                        node.SetPiece(_pawn);
+                    case 1:
+                        var piece = SpawnPiece(_pawnWhite, Color.white, x, y);
+                        node.PutPiece(piece);
                         break;
-                    case 0 or 7 when x is 0 or 7:
-                        SpawnPiece(_rook, x, y);
-                        node.SetPiece(_rook);
+                    case 6:
+                        piece = SpawnPiece(_pawnBlack, Color.black, x, y);
+                        node.PutPiece(piece);
                         break;
-                    case 0 or 7 when x is 1 or 6:
-                        SpawnPiece(_knight, x, y);
-                        node.SetPiece(_knight);
+
+                    case 0:
+                        switch (x)
+                        {
+                            case 0 or 7:
+                                piece = SpawnPiece(_rook, Color.white, x, y);
+                                node.PutPiece(piece);
+                                break;
+
+                            case 1 or 6:
+                                piece = SpawnPiece(_knight, Color.white, x, y);
+                                node.PutPiece(piece);
+                                break;
+
+                            case 2 or 5:
+                                piece = SpawnPiece(_bishop, Color.white, x, y);
+                                node.PutPiece(piece);
+                                break;
+
+                            case 3:
+                                piece = SpawnPiece(_queen, Color.white, x, y);
+                                node.PutPiece(piece);
+                                break;
+
+                            case 4:
+                                piece = SpawnPiece(_king, Color.white, x, y);
+                                node.PutPiece(piece);
+                                break;
+                        }
                         break;
-                    case 0 or 7 when x is 2 or 5:
-                        SpawnPiece(_bishop, x, y);
-                        node.SetPiece(_bishop);
-                        break;
-                    case 0 or 7 when x is 3:
-                        SpawnPiece(_queen, x, y);
-                        node.SetPiece(_queen);
-                        break;
-                    case 0 or 7 when x is 4:
-                        SpawnPiece(_king, x, y);
-                        node.SetPiece(_king);
+
+                    case 7:
+                        switch (x)
+                        {
+                            case 0 or 7:
+                                piece = SpawnPiece(_rook, Color.black, x, y);
+                                node.PutPiece(piece);
+                                break;
+
+                            case 1 or 6:
+                                piece = SpawnPiece(_knight, Color.black, x, y);
+                                node.PutPiece(piece);
+                                break;
+
+                            case 2 or 5:
+                                piece = SpawnPiece(_bishop, Color.black, x, y);
+                                node.PutPiece(piece);
+                                break;
+
+                            case 3:
+                                piece = SpawnPiece(_queen, Color.black, x, y);
+                                node.PutPiece(piece);
+                                break;
+
+                            case 4:
+                                piece = SpawnPiece(_king, Color.black, x, y);
+                                node.PutPiece(piece);
+                                break;
+                        }
                         break;
                 }
 
@@ -78,43 +126,94 @@ public class Board : MonoBehaviour
     {
         if (InputManager.IsNodeSelected)
         {
-            var selectedNode = InputManager.NodeSelected;
-            var x = selectedNode.x;
-            var y = selectedNode.y;
-
-            _currentSelectedNode = Nodes[x, y];
-            
-            if (_currentSelectedNode != _previousSelectedNode)
-            {
-                foreach (var possibleMove in _possibleMoves)
-                {
-                    Nodes[possibleMove.x, possibleMove.y].ResetColor();
-                }
-
-                _possibleMoves.Clear();
-                _previousSelectedNode = _currentSelectedNode;
-            }
-            
-            if (Nodes[x, y].Piece == null)
-            {
-                return;
-            }
-
-            foreach (var possibleMove in Nodes[x, y].Piece.MovementPossibilities(x, y))
-            {
-                _possibleMoves.Add(possibleMove);
-                Nodes[possibleMove.x, possibleMove.y].ChangeColor(_brightColor);
-            }
+            HandlePiece();
         }
     }
 
-    public void ShowMovementPossibilities(int x, int y)
+    public void HandlePiece()
     {
-        Nodes[x, y].SetBaseColor(_brightColor);
+        var nodePos = InputManager.NodeSelected;
+
+        _currentSelectedNode = Nodes[nodePos.x, nodePos.y];
+        
+        if (_currentSelectedNode == _previousSelectedNode)
+        {
+            return;
+        }
+        
+        if (_hasSelectedPiece)
+        {
+            //TODO implement if is my piece
+            MovePiece(nodePos);
+            return;
+        }
+
+        if (_currentSelectedNode.HasPiece())
+        {
+            GetPiece(nodePos);
+        }
+    }
+
+    private void MovePiece(Vector2Int desiredMove)
+    {
+        foreach (var possibleMove in _possibleMoves)
+        {
+            if (desiredMove == possibleMove)
+            {
+                Nodes[_selectedPiecePosition.x, _selectedPiecePosition.y].RemovePiece();
+                Nodes[desiredMove.x, desiredMove.y].PutPiece(_selectedPiece);
+                _selectedPiece.transform.position = new Vector3(desiredMove.x, desiredMove.y, 0);
+                
+                ResetStatus();
+                break;
+            }
+        }
     }
     
-    private void SpawnPiece(Piece prefab, int x, int y)
+    private void GetPiece(Vector2Int selectedNode)
     {
-        Instantiate(prefab, new Vector3(x, y, 0), Quaternion.Euler(-90f,0,0), _parent);
+        _selectedPiece = Nodes[selectedNode.x, selectedNode.y].GetPiece();
+        _selectedPiecePosition = new Vector2Int(selectedNode.x, selectedNode.y);
+        _hasSelectedPiece = true;
+        
+        GetAndShowMovementPossibilities(selectedNode);
+    }
+    
+    private void GetAndShowMovementPossibilities(Vector2Int selectedNodePosition)
+    {
+        foreach (var possibleMove in _selectedPiece.MovementPossibilities(selectedNodePosition))
+        {
+            _possibleMoves.Add(possibleMove);
+            Nodes[possibleMove.x, possibleMove.y].ChangeColor(_brightColor);
+        }
+    }
+
+    private void ResetStatus()
+    {
+        foreach (var possibleMove in _possibleMoves)
+        {
+            Nodes[possibleMove.x, possibleMove.y].ResetColor();
+        }
+        
+        _possibleMoves.Clear();
+        _previousSelectedNode = _currentSelectedNode;
+        _hasSelectedPiece = false;
+    }
+
+    private Piece SpawnPiece(Piece prefab, Color color, int x, int y)
+    {
+        var piece = Instantiate(prefab, new Vector3(x, y, 0), Quaternion.Euler(-90f, 0, 0), _parent);
+        piece.GetComponent<MeshRenderer>().material.color = color;
+        return piece;
+    }
+
+    public static Node GetNode(int x, int y)
+    {
+        return Nodes[x, y];
+    }
+
+    public static Node GetNode(Vector2Int index)
+    {
+        return Nodes[index.x, index.y];
     }
 }

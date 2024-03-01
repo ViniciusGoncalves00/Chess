@@ -248,7 +248,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _parent: {fileID: 911991440}
   _prefab: {fileID: 2053122750686785324, guid: b53f1e9ef5c745441a2ec896877d7685, type: 3}
-  _pawn: {fileID: 3639885421992271164, guid: 391882f14be491c40962add653844907, type: 3}
+  _pawnWhite: {fileID: 3639885421992271164, guid: 391882f14be491c40962add653844907, type: 3}
+  _pawnBlack: {fileID: -3121687627174596724, guid: b1d95c04dd54e434aa65855a0f77d30f, type: 3}
   _rook: {fileID: -7772227341103743664, guid: f1fc282519e5c4a4daaa864f9c3d446f, type: 3}
   _knight: {fileID: -6846438135207997677, guid: 85ad2c556fdbd5747ac7f5f67f10e59b, type: 3}
   _bishop: {fileID: 4004969360053590396, guid: 1c0f2faf14460a5478057fd4e0575576, type: 3}

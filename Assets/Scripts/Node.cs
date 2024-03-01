@@ -1,18 +1,19 @@
 using Pieces;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Node : MonoBehaviour
 {
     public MeshRenderer MeshRenderer;
-    public Piece Piece { get; private set; }
-    public bool IsEmpty = true;
+    private Piece _piece;
+    private bool _hasPiece;
 
-    private Color OriginalColor;
+    private Color _originalColor;
     
     public void SetBaseColor(Color color)
     {
         MeshRenderer.material.color = color;
-        OriginalColor = color;
+        _originalColor = color;
     }
     
     public void ChangeColor(Color color)
@@ -22,12 +23,28 @@ public class Node : MonoBehaviour
     
     public void ResetColor()
     {
-        MeshRenderer.material.color = OriginalColor;
+        MeshRenderer.material.color = _originalColor;
     }
 
-    public void SetPiece(Piece piece)
+    public void PutPiece(Piece piece)
     {
-        Piece = piece;
-        IsEmpty = false;
+        _piece = piece;
+        _hasPiece = true;
+    }
+    
+    public void RemovePiece()
+    {
+        _piece = null;
+        _hasPiece = false;
+    }
+
+    public Piece GetPiece()
+    {
+        return _piece;
+    }
+
+    public bool HasPiece()
+    {
+        return _hasPiece;
     }
 }

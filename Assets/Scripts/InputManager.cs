@@ -33,21 +33,24 @@ public class InputManager : MonoBehaviour
 
     private void Desktop()
     {
-        MousePosition = Input.mousePosition;
-        var ray = _camera.ScreenPointToRay(MousePosition);
+        if (Input.GetMouseButtonDown(0))
+        {
+            MousePosition = Input.mousePosition;
+            var ray = _camera.ScreenPointToRay(MousePosition);
 
-        if (Physics.Raycast(ray, out var hit) && hit.collider.CompareTag("Node"))
-        {
-            var pos = hit.transform.position;
-            var x = Mathf.RoundToInt(pos.x);
-            var y = Mathf.RoundToInt(pos.y);
+            if (Physics.Raycast(ray, out var hit) && hit.collider.CompareTag("Node"))
+            {
+                var pos = hit.transform.position;
+                var x = Mathf.RoundToInt(pos.x);
+                var y = Mathf.RoundToInt(pos.y);
                 
-            NodeSelected = new Vector2Int(x,y);
-            IsNodeSelected = true;
-        }
-        else
-        {
-            IsNodeSelected = false;
+                NodeSelected = new Vector2Int(x,y);
+                IsNodeSelected = true;
+            }
+            else
+            {
+                IsNodeSelected = false;
+            }
         }
     }
 
