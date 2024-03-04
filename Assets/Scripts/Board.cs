@@ -17,8 +17,7 @@ public class Board : MonoBehaviour
     [SerializeField] private King _king;
 
     [SerializeField] private Color _brightColor = Color.yellow;
-
-    private Node _previousSelectedNode;
+    
     private Node _currentSelectedNode;
     private Piece _selectedPiece;
     private Vector2Int _selectedPiecePosition;
@@ -135,25 +134,26 @@ public class Board : MonoBehaviour
         }
     }
 
-    public void HandlePiece()
+    private void HandlePiece()
     {
         var nodePos = InputManager.NodeSelected;
 
         _currentSelectedNode = Nodes[nodePos.x, nodePos.y];
-        
-        if (_currentSelectedNode == _previousSelectedNode)
-        {
-            return;
-        }
-        
+
         if (_hasSelectedPiece)
         {
-            //TODO implement if is my piece
-            MovePiece(nodePos);
-            return;
+            if (_currentSelectedNode.HasPiece() && _currentSelectedNode.GetPiece().GetPieceColor() == _colorTurn)
+            {
+                GetPiece(nodePos);
+            }
+            
+            else if (_possibleMoves.Count > 0)
+            {
+                MovePiece(nodePos);
+            }
         }
-
-        if (_currentSelectedNode.HasPiece())
+        
+        else if (_currentSelectedNode.HasPiece() && _currentSelectedNode.GetPiece().GetPieceColor() == _colorTurn)
         {
             GetPiece(nodePos);
         }
@@ -207,7 +207,6 @@ public class Board : MonoBehaviour
         };
 
         _possibleMoves.Clear();
-        _previousSelectedNode = _currentSelectedNode;
         _hasSelectedPiece = false;
     }
 

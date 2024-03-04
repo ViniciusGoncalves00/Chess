@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 
 public class Node : MonoBehaviour
 {
-    public MeshRenderer MeshRenderer;
+    [SerializeField] private MeshRenderer _meshRenderer;
     private Piece _piece;
     private bool _hasPiece;
 
@@ -12,18 +12,18 @@ public class Node : MonoBehaviour
     
     public void SetBaseColor(Color color)
     {
-        MeshRenderer.material.color = color;
+        _meshRenderer.material.color = color;
         _originalColor = color;
     }
     
     public void ChangeColor(Color color)
     {
-        MeshRenderer.material.color = color;
+        _meshRenderer.material.color = color;
     }
     
     public void ResetColor()
     {
-        MeshRenderer.material.color = _originalColor;
+        _meshRenderer.material.color = _originalColor;
     }
 
     public void PutPiece(Piece piece)

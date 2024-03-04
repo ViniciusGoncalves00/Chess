@@ -5,7 +5,7 @@ namespace Pieces
 {
     public abstract class Piece :  MonoBehaviour
     {
-        public PieceColor PieceColor;
+        private protected PieceColor PieceColor;
         public abstract Vector2Int[] MovementPossibilities(Vector2Int position);
         public void SetPieceColor(PieceColor pieceColor)
         {

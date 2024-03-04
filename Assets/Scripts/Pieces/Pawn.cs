@@ -21,7 +21,7 @@ namespace Pieces
         
         public override Vector2Int[] MovementPossibilities(Vector2Int position)
         {
-            var array = new List<Vector2Int>();
+            var possibleMovements = new List<Vector2Int>();
             
             _position = position;
             _oneForwardPosition = _position + new Vector2Int(_oneForward.x, _oneForward.y * Direction);
@@ -30,35 +30,44 @@ namespace Pieces
             _rightForwardPosition = _position + new Vector2Int(_rightForward.x, _rightForward.y * Direction);
 
             var oneForwardNode = Board.GetNode(_oneForwardPosition);
-            var twoForwardNode = Board.GetNode(_twoForwardPosition);
-            var leftForwardNode = Board.GetNode(_leftForwardPosition);
-            var rightForwardNode = Board.GetNode(_rightForwardPosition);
-
+            
             if (oneForwardNode.HasPiece() == false)
             {
-                array.Add(_oneForwardPosition);
+                possibleMovements.Add(_oneForwardPosition);
             }
-            if (_firstMovement && oneForwardNode.HasPiece() == false && twoForwardNode.HasPiece() == false)
+            
+            if (_firstMovement)
             {
-                array.Add(_twoForwardPosition);
-                _firstMovement = false;
-            }
-            if (ValidMovement(_leftForwardPosition) && leftForwardNode.HasPiece())
-            {
-                if (leftForwardNode.GetPiece().PieceColor != PieceColor)
+                var twoForwardNode = Board.GetNode(_twoForwardPosition);
+                
+                if (oneForwardNode.HasPiece() == false && twoForwardNode.HasPiece() == false)
                 {
-                    array.Add(_leftForwardPosition);
+                    possibleMovements.Add(_twoForwardPosition);
+                    _firstMovement = false;
                 }
             }
-            if (ValidMovement(_rightForwardPosition) && rightForwardNode.HasPiece())
+            
+            if (ValidMovement(_leftForwardPosition))
             {
-                if (rightForwardNode.GetPiece().PieceColor != PieceColor)
+                var leftForwardNode = Board.GetNode(_leftForwardPosition);
+                
+                if (leftForwardNode.HasPiece() && leftForwardNode.GetPiece().GetPieceColor() != PieceColor)
                 {
-                    array.Add(_rightForwardPosition);
+                    possibleMovements.Add(_leftForwardPosition);
+                }
+            }
+            
+            if (ValidMovement(_rightForwardPosition))
+            {
+                var rightForwardNode = Board.GetNode(_rightForwardPosition);
+                
+                if (rightForwardNode.HasPiece() && rightForwardNode.GetPiece().GetPieceColor() != PieceColor)
+                {
+                    possibleMovements.Add(_rightForwardPosition);
                 }
             }
 
-            return array.ToArray();
+            return possibleMovements.ToArray();
         }
 
         // public override void Move(Vector3Int movement)
