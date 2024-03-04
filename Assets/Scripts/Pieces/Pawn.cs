@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Pieces
 {
-    public class Pawn : Piece
+    public class Pawn : Piece, IPawn
     {
         public int Direction;
         private bool _firstMovement = true;
@@ -43,7 +43,6 @@ namespace Pieces
                 if (oneForwardNode.HasPiece() == false && twoForwardNode.HasPiece() == false)
                 {
                     possibleMovements.Add(_twoForwardPosition);
-                    _firstMovement = false;
                 }
             }
             
@@ -84,6 +83,10 @@ namespace Pieces
         {
             return possibleMovement.x is >= 0 and <= 7 &&
                    possibleMovement.y is >= 0 and <= 7;
+        }
+        public void FirstMovement()
+        {
+            _firstMovement = false;
         }
     }
 }

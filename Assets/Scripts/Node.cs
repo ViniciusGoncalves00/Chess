@@ -1,3 +1,4 @@
+using System;
 using Pieces;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -9,7 +10,7 @@ public class Node : MonoBehaviour
     private bool _hasPiece;
 
     private Color _originalColor;
-    
+
     public void SetBaseColor(Color color)
     {
         _meshRenderer.material.color = color;
@@ -26,7 +27,7 @@ public class Node : MonoBehaviour
         _meshRenderer.material.color = _originalColor;
     }
 
-    public void PutPiece(Piece piece)
+    public void StorePiece(Piece piece)
     {
         _piece = piece;
         _hasPiece = true;
