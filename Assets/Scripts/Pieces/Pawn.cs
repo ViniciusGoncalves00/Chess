@@ -6,6 +6,7 @@ namespace Pieces
     public class Pawn : Piece
     {
         public int Direction;
+        private bool _firstMovement = true;
         
         private Vector2Int _position;
         private readonly Vector2Int _oneForward = new Vector2Int(0, 1);
@@ -28,26 +29,38 @@ namespace Pieces
             _leftForwardPosition = _position + new Vector2Int(_leftForward.x, _leftForward.y * Direction); 
             _rightForwardPosition = _position + new Vector2Int(_rightForward.x, _rightForward.y * Direction);
 
-            if (ValidMovement(_oneForwardPosition) && Board.GetNode(_oneForwardPosition).HasPiece() == false)
+            var oneForwardNode = Board.GetNode(_oneForwardPosition);
+            var twoForwardNode = Board.GetNode(_twoForwardPosition);
+            var leftForwardNode = Board.GetNode(_leftForwardPosition);
+            var rightForwardNode = Board.GetNode(_rightForwardPosition);
+
+            if (oneForwardNode.HasPiece() == false)
             {
                 array.Add(_oneForwardPosition);
             }
-            if (ValidMovement(_twoForwardPosition) && Board.GetNode(_oneForwardPosition).HasPiece() == false && Board.GetNode(_twoForwardPosition).HasPiece() == false)
+            if (_firstMovement && oneForwardNode.HasPiece() == false && twoForwardNode.HasPiece() == false)
             {
                 array.Add(_twoForwardPosition);
+                _firstMovement = false;
             }
-            if (ValidMovement(_leftForwardPosition) && Board.GetNode(_leftForwardPosition).HasPiece())
+            if (ValidMovement(_leftForwardPosition) && leftForwardNode.HasPiece())
             {
-                array.Add(_leftForwardPosition);
+                if (leftForwardNode.GetPiece().PieceColor != PieceColor)
+                {
+                    array.Add(_leftForwardPosition);
+                }
             }
-            if (ValidMovement(_rightForwardPosition) && Board.GetNode(_rightForwardPosition).HasPiece())
+            if (ValidMovement(_rightForwardPosition) && rightForwardNode.HasPiece())
             {
-                array.Add(_rightForwardPosition);
+                if (rightForwardNode.GetPiece().PieceColor != PieceColor)
+                {
+                    array.Add(_rightForwardPosition);
+                }
             }
 
             return array.ToArray();
         }
-        
+
         // public override void Move(Vector3Int movement)
         // {
         //     gameObject.transform.position = movement;

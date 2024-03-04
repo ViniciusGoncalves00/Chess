@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pieces;
 using UnityEngine;
@@ -23,6 +24,8 @@ public class Board : MonoBehaviour
     private Vector2Int _selectedPiecePosition;
     private bool _hasSelectedPiece;
 
+    private PieceColor _colorTurn;
+
     private readonly List<Vector2Int> _possibleMoves = new List<Vector2Int>();
 
     private static readonly Node[,] Nodes = new Node[8, 8];
@@ -30,6 +33,8 @@ public class Board : MonoBehaviour
     private void Start()
     {
         var nodeColor = false;
+
+        _colorTurn = PieceColor.White;
 
         for (int y = 0; y < 8; y++)
         {
@@ -48,11 +53,11 @@ public class Board : MonoBehaviour
                     case > 1 and < 6:
                         break;
                     case 1:
-                        var piece = SpawnPiece(_pawnWhite, Color.white, x, y);
+                        var piece = SpawnPiece(_pawnWhite, PieceColor.White, x, y);
                         node.PutPiece(piece);
                         break;
                     case 6:
-                        piece = SpawnPiece(_pawnBlack, Color.black, x, y);
+                        piece = SpawnPiece(_pawnBlack,PieceColor.Black, x, y);
                         node.PutPiece(piece);
                         break;
 
@@ -60,27 +65,27 @@ public class Board : MonoBehaviour
                         switch (x)
                         {
                             case 0 or 7:
-                                piece = SpawnPiece(_rook, Color.white, x, y);
+                                piece = SpawnPiece(_rook, PieceColor.White, x, y);
                                 node.PutPiece(piece);
                                 break;
 
                             case 1 or 6:
-                                piece = SpawnPiece(_knight, Color.white, x, y);
+                                piece = SpawnPiece(_knight, PieceColor.White, x, y);
                                 node.PutPiece(piece);
                                 break;
 
                             case 2 or 5:
-                                piece = SpawnPiece(_bishop, Color.white, x, y);
+                                piece = SpawnPiece(_bishop, PieceColor.White, x, y);
                                 node.PutPiece(piece);
                                 break;
 
                             case 3:
-                                piece = SpawnPiece(_queen, Color.white, x, y);
+                                piece = SpawnPiece(_queen, PieceColor.White, x, y);
                                 node.PutPiece(piece);
                                 break;
 
                             case 4:
-                                piece = SpawnPiece(_king, Color.white, x, y);
+                                piece = SpawnPiece(_king, PieceColor.White, x, y);
                                 node.PutPiece(piece);
                                 break;
                         }
@@ -90,27 +95,27 @@ public class Board : MonoBehaviour
                         switch (x)
                         {
                             case 0 or 7:
-                                piece = SpawnPiece(_rook, Color.black, x, y);
+                                piece = SpawnPiece(_rook, PieceColor.Black, x, y);
                                 node.PutPiece(piece);
                                 break;
 
                             case 1 or 6:
-                                piece = SpawnPiece(_knight, Color.black, x, y);
+                                piece = SpawnPiece(_knight, PieceColor.Black, x, y);
                                 node.PutPiece(piece);
                                 break;
 
                             case 2 or 5:
-                                piece = SpawnPiece(_bishop, Color.black, x, y);
+                                piece = SpawnPiece(_bishop, PieceColor.Black, x, y);
                                 node.PutPiece(piece);
                                 break;
 
                             case 3:
-                                piece = SpawnPiece(_queen, Color.black, x, y);
+                                piece = SpawnPiece(_queen, PieceColor.Black, x, y);
                                 node.PutPiece(piece);
                                 break;
 
                             case 4:
-                                piece = SpawnPiece(_king, Color.black, x, y);
+                                piece = SpawnPiece(_king, PieceColor.Black, x, y);
                                 node.PutPiece(piece);
                                 break;
                         }
@@ -194,16 +199,29 @@ public class Board : MonoBehaviour
         {
             Nodes[possibleMove.x, possibleMove.y].ResetColor();
         }
-        
+
+        _colorTurn = _colorTurn switch
+        {
+            PieceColor.White => PieceColor.Black,
+            PieceColor.Black => PieceColor.White,
+        };
+
         _possibleMoves.Clear();
         _previousSelectedNode = _currentSelectedNode;
         _hasSelectedPiece = false;
     }
 
-    private Piece SpawnPiece(Piece prefab, Color color, int x, int y)
+    private Piece SpawnPiece(Piece prefab, PieceColor color, int x, int y)
     {
         var piece = Instantiate(prefab, new Vector3(x, y, 0), Quaternion.Euler(-90f, 0, 0), _parent);
-        piece.GetComponent<MeshRenderer>().material.color = color;
+        piece.SetPieceColor(color);
+
+        piece.GetComponent<MeshRenderer>().material.color = color switch
+        {
+            PieceColor.White => Color.white,
+            PieceColor.Black => Color.black,
+        };
+
         return piece;
     }
 
