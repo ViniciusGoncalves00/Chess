@@ -19,7 +19,7 @@ namespace Pieces
         private Vector2Int _leftForwardPosition;
         private Vector2Int _rightForwardPosition;
         
-        public override Vector2Int[] MovementPossibilities(Vector2Int position)
+        public override List<Vector2Int> PossibleMovements(Vector2Int position)
         {
             var possibleMovements = new List<Vector2Int>();
             
@@ -46,44 +46,33 @@ namespace Pieces
                 }
             }
             
-            if (ValidMovement(_leftForwardPosition))
+            if (InsideOfBounds(_leftForwardPosition))
             {
                 var leftForwardNode = Board.GetNode(_leftForwardPosition);
                 
-                if (leftForwardNode.HasPiece() && leftForwardNode.GetPiece().GetPieceColor() != PieceColor)
+                if (CanMoveToThisNode(leftForwardNode))
                 {
                     possibleMovements.Add(_leftForwardPosition);
                 }
             }
             
-            if (ValidMovement(_rightForwardPosition))
+            if (InsideOfBounds(_rightForwardPosition))
             {
                 var rightForwardNode = Board.GetNode(_rightForwardPosition);
                 
-                if (rightForwardNode.HasPiece() && rightForwardNode.GetPiece().GetPieceColor() != PieceColor)
+                if (CanMoveToThisNode(rightForwardNode))
                 {
                     possibleMovements.Add(_rightForwardPosition);
                 }
             }
 
-            return possibleMovements.ToArray();
+            return possibleMovements;
+        }
+        private bool CanMoveToThisNode(Node node)
+        {
+            return node.HasPiece() && node.GetPiece().GetPieceColor() != PieceColor;
         }
 
-        // public override void Move(Vector3Int movement)
-        // {
-        //     gameObject.transform.position = movement;
-        // }
-        
-        public override void Move()
-        {
-            throw new System.NotImplementedException();
-        }
-        
-        public override bool ValidMovement(Vector2Int possibleMovement)
-        {
-            return possibleMovement.x is >= 0 and <= 7 &&
-                   possibleMovement.y is >= 0 and <= 7;
-        }
         public void FirstMovement()
         {
             _firstMovement = false;

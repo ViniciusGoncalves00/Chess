@@ -1,12 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Pieces
 {
     public abstract class Piece :  MonoBehaviour
     {
         private protected PieceColor PieceColor;
-        public abstract Vector2Int[] MovementPossibilities(Vector2Int position);
+        public abstract List<Vector2Int> PossibleMovements(Vector2Int position);
         public void SetPieceColor(PieceColor pieceColor)
         {
             PieceColor = pieceColor;
@@ -15,7 +15,11 @@ namespace Pieces
         {
             return PieceColor;
         }
-        public abstract void Move();
-        public abstract bool ValidMovement(Vector2Int possibleMovement);
+        
+        protected virtual bool InsideOfBounds(Vector2Int possibleMovement)
+        {
+            return possibleMovement.x is >= 0 and <= 7 &&
+                   possibleMovement.y is >= 0 and <= 7;
+        }
     }
 }

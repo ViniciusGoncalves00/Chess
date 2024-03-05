@@ -132,6 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 478604253}
+  - component: {fileID: 478604254}
   m_Layer: 0
   m_Name: Spawner
   m_TagString: Untagged
@@ -148,12 +149,32 @@ Transform:
   m_GameObject: {fileID: 478604252}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.289503, y: 2.0260637, z: 6.9157014}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &478604254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 478604252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37f0ab4c2ecc4734f9ddbf7694139d88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _parent: {fileID: 478604253}
+  _pawnWhite: {fileID: 3639885421992271164, guid: 391882f14be491c40962add653844907, type: 3}
+  _pawnBlack: {fileID: -3121687627174596724, guid: b1d95c04dd54e434aa65855a0f77d30f, type: 3}
+  _rook: {fileID: -7772227341103743664, guid: f1fc282519e5c4a4daaa864f9c3d446f, type: 3}
+  _knight: {fileID: -6846438135207997677, guid: 85ad2c556fdbd5747ac7f5f67f10e59b, type: 3}
+  _bishop: {fileID: 4004969360053590396, guid: 1c0f2faf14460a5478057fd4e0575576, type: 3}
+  _queen: {fileID: -6043288807697804430, guid: be3573ba2ba53ea4f8979e64874c493d, type: 3}
+  _king: {fileID: 7527786624514194105, guid: 27d2608cb94ae2d44811af52793c3562, type: 3}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,14 +300,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _parent: {fileID: 911991440}
   _prefab: {fileID: 2053122750686785324, guid: b53f1e9ef5c745441a2ec896877d7685, type: 3}
-  _pawnWhite: {fileID: 3639885421992271164, guid: 391882f14be491c40962add653844907, type: 3}
-  _pawnBlack: {fileID: -3121687627174596724, guid: b1d95c04dd54e434aa65855a0f77d30f, type: 3}
-  _rook: {fileID: -7772227341103743664, guid: f1fc282519e5c4a4daaa864f9c3d446f, type: 3}
-  _knight: {fileID: -6846438135207997677, guid: 85ad2c556fdbd5747ac7f5f67f10e59b, type: 3}
-  _bishop: {fileID: 4004969360053590396, guid: 1c0f2faf14460a5478057fd4e0575576, type: 3}
-  _queen: {fileID: -6043288807697804430, guid: be3573ba2ba53ea4f8979e64874c493d, type: 3}
-  _king: {fileID: 7527786624514194105, guid: 27d2608cb94ae2d44811af52793c3562, type: 3}
-  _brightColor: {r: 1, g: 0.5013487, b: 0, a: 0}
 --- !u!4 &911991440
 Transform:
   m_ObjectHideFlags: 0
@@ -361,7 +374,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 75
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -388,7 +401,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.5, y: 3.5, z: -10}
+  m_LocalPosition: {x: 3.5, y: 3.5, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -403,6 +416,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1683537990}
+  - component: {fileID: 1683537991}
   m_Layer: 0
   m_Name: GameHandler
   m_TagString: Untagged
@@ -419,12 +433,25 @@ Transform:
   m_GameObject: {fileID: 1683537989}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.289503, y: 2.0260637, z: 6.9157014}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1683537991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1683537989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df6db371bb615d145b8723f4665606eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _brightColor: {r: 1, g: 0.60672367, b: 0.015686274, a: 1}
 --- !u!1 &1914730783
 GameObject:
   m_ObjectHideFlags: 0

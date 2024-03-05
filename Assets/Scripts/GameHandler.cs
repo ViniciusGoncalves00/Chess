@@ -15,7 +15,9 @@ public class GameHandler : MonoBehaviour
     
     private PieceColor _colorTurn;
     
-    private readonly List<Vector2Int> _possibleMoves = new List<Vector2Int>();
+    private List<Vector2Int> _possibleMoves = new List<Vector2Int>();
+    private List<Piece> _whitePiecesRemoved = new List<Piece>();
+    private List<Piece> _blackPiecesRemoved = new List<Piece>();
 
     private void Start()
     {
@@ -48,12 +50,16 @@ public class GameHandler : MonoBehaviour
                 ResetStatus();
                 GetPiece(nodePos);
             }
-
+            
             else if (_possibleMoves.Count > 0)
             {
-                MovePiece(nodePos);
+                TryMovePiece(nodePos, out var doMove);
                 ResetStatus();
-                SwitchTurn();
+                
+                if (doMove)
+                {
+                    SwitchTurn();
+                }
             }
         }
 
@@ -65,22 +71,52 @@ public class GameHandler : MonoBehaviour
         _previousSelectedNode = _currentSelectedNode;
     }
 
-    private void MovePiece(Vector2Int desiredMove)
+    private void TryMovePiece(Vector2Int desiredMove, out bool doMove)
     {
-        if (_selectedPiece is IPawn)
-        {
-            _selectedPiece.GetComponent<IPawn>().FirstMovement();
-        }
+        doMove = false;
 
         foreach (var possibleMove in _possibleMoves)
         {
-            if (desiredMove == possibleMove)
+            if (desiredMove != possibleMove)
             {
-                Board.GetNode(_selectedPiecePosition).RemovePiece();
-                Board.GetNode(desiredMove).StorePiece(_selectedPiece);
-                _selectedPiece.transform.position = new Vector3(desiredMove.x, desiredMove.y, 0);
-                break;
+                continue;
             }
+
+            switch (_selectedPiece)
+            {
+                case Pawn:
+                    _selectedPiece.GetComponent<Pawn>().FirstMovement();
+                    break;
+                case King:
+                    //TODO finish game
+                    break;
+            }
+                
+            Board.GetNode(_selectedPiecePosition).RemovePiece();
+            var node = Board.GetNode(desiredMove);
+
+            if (node.HasPiece())
+            {
+                var piece = node.GetPiece();
+                    
+                if (piece.GetPieceColor() == PieceColor.White)
+                {
+                    _whitePiecesRemoved.Add(piece);
+                }
+                else if (piece.GetPieceColor() == PieceColor.Black)
+                {
+                    _blackPiecesRemoved.Add(piece);
+                }
+
+                piece.transform.position = new Vector3(piece.transform.position.x, piece.transform.position.y, 10);
+                        
+                node.RemovePiece();
+            }
+                
+            node.StorePiece(_selectedPiece);
+            _selectedPiece.transform.position = new Vector3(desiredMove.x, desiredMove.y, 0);
+            doMove = true;
+            return;
         }
     }
     
@@ -95,9 +131,10 @@ public class GameHandler : MonoBehaviour
     
     private void GetAndShowMovementPossibilities(Vector2Int selectedNodePosition)
     {
-        foreach (var possibleMove in _selectedPiece.MovementPossibilities(selectedNodePosition))
+        _possibleMoves = _selectedPiece.PossibleMovements(selectedNodePosition);
+        
+        foreach (var possibleMove in _possibleMoves)
         {
-            _possibleMoves.Add(possibleMove);
             Board.GetNode(possibleMove).ChangeColor(_brightColor);
         }
     }
@@ -119,6 +156,7 @@ public class GameHandler : MonoBehaviour
         {
             PieceColor.White => PieceColor.Black,
             PieceColor.Black => PieceColor.White,
+            _ => throw new ArgumentOutOfRangeException()
         };
     }
 }
