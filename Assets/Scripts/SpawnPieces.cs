@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Pieces;
 using UnityEngine;
 
@@ -13,6 +14,9 @@ public class SpawnPieces : MonoBehaviour
     [SerializeField] private Bishop _bishop;
     [SerializeField] private Queen _queen;
     [SerializeField] private King _king;
+    
+    public static readonly List<Piece> WhitePieces = new List<Piece>();
+    public static readonly List<Piece> BlackPieces = new List<Piece>();
 
     private int _x;
     private int _y;
@@ -64,16 +68,23 @@ public class SpawnPieces : MonoBehaviour
     }
 
     private void SpawnPiece(Piece prefab)
-    {
+    { 
         var piece = Instantiate(prefab, new Vector3(_x, _y, 0), Quaternion.Euler(-90f, 0, 0), _parent);
-
-        var color = _y switch
+        
+        var color = (PieceColor) 0;
+        
+        switch (_y)
         {
-            0 or 1 => PieceColor.White,
-            6 or 7 => PieceColor.Black,
-            _ => throw new ArgumentOutOfRangeException(nameof(_y), _y, null)
-        };
-
+            case 0 or 1:
+                color = PieceColor.White;
+                WhitePieces.Add(piece);
+                break;
+            case 6 or 7:
+                color = PieceColor.Black;
+                BlackPieces.Add(piece);
+                break;
+        }
+        
         piece.SetPieceColor(color);
 
         piece.GetComponent<MeshRenderer>().material.color = color switch
@@ -82,7 +93,7 @@ public class SpawnPieces : MonoBehaviour
             PieceColor.Black => Color.black,
             _ => throw new ArgumentOutOfRangeException(nameof(color), color, null)
         };
-
+        
         Board.GetNode(_x, _y).StorePiece(piece);
     }
 }

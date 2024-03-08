@@ -5,6 +5,8 @@ namespace Pieces
 {
     public class Pawn : Piece, IPawn
     {
+        private protected override int PieceValue { get; set; } = 1;
+        
         public int Direction;
         private bool _firstMovement = true;
         
@@ -29,11 +31,16 @@ namespace Pieces
             _leftForwardPosition = _position + new Vector2Int(_leftForward.x, _leftForward.y * Direction); 
             _rightForwardPosition = _position + new Vector2Int(_rightForward.x, _rightForward.y * Direction);
 
-            var oneForwardNode = Board.GetNode(_oneForwardPosition);
-            
-            if (oneForwardNode.HasPiece() == false)
+            var oneForwardNode = (Node) null;
+
+            if (InsideOfBounds(_oneForwardPosition))
             {
-                possibleMovements.Add(_oneForwardPosition);
+                oneForwardNode = Board.GetNode(_oneForwardPosition);
+                
+                if (oneForwardNode.HasPiece() == false)
+                {
+                    possibleMovements.Add(_oneForwardPosition);
+                }
             }
             
             if (_firstMovement)

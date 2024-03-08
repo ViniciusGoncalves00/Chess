@@ -5,6 +5,8 @@ namespace Pieces
 {
     public class Queen : Piece
     {
+        private protected override int PieceValue { get; set; } = 9;
+        
         private readonly List<Vector2Int> _possibleMovements = new List<Vector2Int>();
 
         private bool _forward;

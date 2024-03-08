@@ -5,6 +5,8 @@ namespace Pieces
 {
     public class Bishop : Piece
     {
+        private protected override int PieceValue { get; set; } = 5;
+        
         private readonly List<Vector2Int> _possibleMovements = new List<Vector2Int>();
 
         private bool _leftForward;

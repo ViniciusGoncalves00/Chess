@@ -1,27 +1,39 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Pieces;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameHandler : MonoBehaviour
 {
     [SerializeField] private Color _brightColor = Color.yellow;
-    
-    private Node _previousSelectedNode;
-    private Node _currentSelectedNode;
-    private Piece _selectedPiece;
-    private Vector2Int _selectedPiecePosition;
+    [SerializeField] private GameObject _victoryText;
+    [SerializeField] private TMP_Text _winner;
+
+    private Node _currentNode;
+    private Node _previousNode;
+    private Piece _currentPiece;
+    private Piece _capturedPiece;
+    private Vector2Int _currentNodePosition;
+    private Vector2Int _currentPiecePosition;
     private bool _hasSelectedPiece;
-    
+
     private PieceColor _colorTurn;
-    
+
     private List<Vector2Int> _possibleMoves = new List<Vector2Int>();
+    private List<Piece> _whitePiecesAlive = new List<Piece>();
     private List<Piece> _whitePiecesRemoved = new List<Piece>();
+    private List<Piece> _blackPiecesAlive = new List<Piece>();
     private List<Piece> _blackPiecesRemoved = new List<Piece>();
 
     private void Start()
     {
         _colorTurn = PieceColor.White;
+
+        _whitePiecesAlive = SpawnPieces.WhitePieces;
+        _blackPiecesAlive = SpawnPieces.BlackPieces;
     }
 
     private void Update()
@@ -31,121 +43,121 @@ public class GameHandler : MonoBehaviour
             Handle();
         }
     }
-    
+
     private void Handle()
     {
-        var nodePos = InputManager.NodeSelected;
+        _currentNodePosition = InputManager.NodeSelected;
 
-        _currentSelectedNode = Board.GetNode(nodePos);
+        _currentNode = Board.GetNode(_currentNodePosition);
 
-        if (_currentSelectedNode == _previousSelectedNode)
+        if (_currentNode == _previousNode)
         {
             return;
         }
 
         if (_hasSelectedPiece)
         {
-            if (_currentSelectedNode.HasPiece() && _currentSelectedNode.GetPiece().GetPieceColor() == _colorTurn)
+            if (_currentNode.HasPiece() && _currentNode.GetPiece().GetPieceColor() == _colorTurn)
             {
                 ResetStatus();
-                GetPiece(nodePos);
+                GetPiece();
             }
-            
+
             else if (_possibleMoves.Count > 0)
             {
-                TryMovePiece(nodePos, out var doMove);
+                if (TryMovePiece())
+                {
+                    PlayMade();
+                }
+
                 ResetStatus();
-                
-                if (doMove)
-                {
-                    SwitchTurn();
-                }
             }
         }
 
-        else if (_currentSelectedNode.HasPiece() && _currentSelectedNode.GetPiece().GetPieceColor() == _colorTurn)
+        else if (_currentNode.HasPiece() && _currentNode.GetPiece().GetPieceColor() == _colorTurn)
         {
-            GetPiece(nodePos);
+            GetPiece();
         }
 
-        _previousSelectedNode = _currentSelectedNode;
+        _previousNode = _currentNode;
     }
 
-    private void TryMovePiece(Vector2Int desiredMove, out bool doMove)
+    private bool TryMovePiece()
     {
-        doMove = false;
+        var desiredMove = _currentNodePosition;
 
-        foreach (var possibleMove in _possibleMoves)
+        if (_possibleMoves.Contains(desiredMove))
         {
-            if (desiredMove != possibleMove)
-            {
-                continue;
-            }
-
-            switch (_selectedPiece)
-            {
-                case Pawn:
-                    _selectedPiece.GetComponent<Pawn>().FirstMovement();
-                    break;
-                case King:
-                    //TODO finish game
-                    break;
-            }
-                
-            Board.GetNode(_selectedPiecePosition).RemovePiece();
-            var node = Board.GetNode(desiredMove);
-
-            if (node.HasPiece())
-            {
-                var piece = node.GetPiece();
-                    
-                if (piece.GetPieceColor() == PieceColor.White)
-                {
-                    _whitePiecesRemoved.Add(piece);
-                }
-                else if (piece.GetPieceColor() == PieceColor.Black)
-                {
-                    _blackPiecesRemoved.Add(piece);
-                }
-
-                piece.transform.position = new Vector3(piece.transform.position.x, piece.transform.position.y, 10);
-                        
-                node.RemovePiece();
-            }
-                
-            node.StorePiece(_selectedPiece);
-            _selectedPiece.transform.position = new Vector3(desiredMove.x, desiredMove.y, 0);
-            doMove = true;
-            return;
+            MovePiece();
+            return true;
         }
+
+        return false;
     }
-    
-    private void GetPiece(Vector2Int selectedNode)
+
+    private void MovePiece()
     {
-        _selectedPiece = Board.GetNode(selectedNode).GetPiece();
-        _selectedPiecePosition = new Vector2Int(selectedNode.x, selectedNode.y);
+        SpecialCase();
+
+        _previousNode.RemovePiece();
+
+        if (_currentNode.HasPiece())
+        {
+            CapturePiece();
+        }
+
+        _currentNode.StorePiece(_currentPiece);
+        _currentPiece.transform.position = new Vector3(_currentNodePosition.x, _currentNodePosition.y, 0);
+    }
+
+    private void CapturePiece()
+    {
+        _capturedPiece = _currentNode.GetPiece();
+
+        switch (_capturedPiece.GetPieceColor())
+        {
+            case PieceColor.White:
+                _whitePiecesAlive.Remove(_capturedPiece);
+                _whitePiecesRemoved.Add(_capturedPiece);
+                break;
+            case PieceColor.Black:
+                _blackPiecesAlive.Remove(_capturedPiece);
+                _blackPiecesRemoved.Add(_capturedPiece);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        var position = _capturedPiece.transform.position;
+        position.z = 10f;
+        _capturedPiece.transform.position = position;
+
+        _currentNode.RemovePiece();
+    }
+
+    private void GetPiece()
+    {
+        _currentPiece = Board.GetNode(_currentNodePosition).GetPiece();
+        _currentPiecePosition = new Vector2Int(_currentNodePosition.x, _currentNodePosition.y);
         _hasSelectedPiece = true;
-        
-        GetAndShowMovementPossibilities(selectedNode);
+
+        GetPossibleMovements();
+        ShowPossibleMovements();
     }
-    
-    private void GetAndShowMovementPossibilities(Vector2Int selectedNodePosition)
+
+    private void GetPossibleMovements()
     {
-        _possibleMoves = _selectedPiece.PossibleMovements(selectedNodePosition);
-        
-        foreach (var possibleMove in _possibleMoves)
-        {
-            Board.GetNode(possibleMove).ChangeColor(_brightColor);
-        }
+        _possibleMoves = _currentPiece.PossibleMovements(_currentPiecePosition);
+    }
+
+    private void ShowPossibleMovements()
+    {
+        _possibleMoves.ForEach(possibleMove => Board.GetNode(possibleMove).ChangeColor(_brightColor));
     }
 
     private void ResetStatus()
     {
-        foreach (var possibleMove in _possibleMoves)
-        {
-            Board.GetNode(possibleMove).ResetColor();
-        }
-        
+        _possibleMoves.ForEach(possibleMove => Board.GetNode(possibleMove).ResetColor());
         _possibleMoves.Clear();
         _hasSelectedPiece = false;
     }
@@ -158,5 +170,102 @@ public class GameHandler : MonoBehaviour
             PieceColor.Black => PieceColor.White,
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+
+    private void SpecialCase()
+    {
+        switch (_currentPiece)
+        {
+            case Pawn:
+                _currentPiece.GetComponent<Pawn>().FirstMovement();
+                break;
+        }
+    }
+
+    private void PlayMade()
+    {
+        switch (_colorTurn)
+        {
+            case PieceColor.White:
+                TryRevivePiece(ref _whitePiecesAlive, ref _whitePiecesRemoved);
+                break;
+            case PieceColor.Black:
+                TryRevivePiece(ref _blackPiecesAlive, ref _blackPiecesRemoved);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        SwitchTurn();
+
+        if (KingCaptured())
+        {
+            FinishGame();
+        }
+    }
+
+    private void TryRevivePiece(ref List<Piece> piecesAlive, ref List<Piece> piecesRemoved)
+    {
+        switch (_currentPiece)
+        {
+            case Pawn when _currentPiece.transform.position.y == 7:
+            case Pawn when _currentPiece.transform.position.y == 0:
+                RevivePiece(ref piecesAlive, ref piecesRemoved);
+                break;
+        }
+    }
+
+    private void RevivePiece(ref List<Piece> piecesAlive, ref List<Piece> piecesRemoved)
+    {
+        var pieceToReviveValue = 0;
+        var pieceToRevive = (Piece) null;
+
+        foreach (var pieceRemoved in piecesRemoved)
+        {
+            var pieceRemovedValue = pieceRemoved.GetPieceValue();
+
+            if (pieceRemovedValue > pieceToReviveValue)
+            {
+                pieceToReviveValue = pieceRemovedValue;
+                pieceToRevive = pieceRemoved;
+            }
+        }
+
+        piecesAlive.Remove(_currentPiece);
+        piecesRemoved.Add(_currentPiece);
+
+        piecesRemoved.Remove(pieceToRevive);
+        piecesAlive.Add(pieceToRevive);
+
+        Board.GetNode(_currentNodePosition).StorePiece(pieceToRevive);
+
+        var position = _currentPiece.transform.position;
+        pieceToRevive.transform.position = position;
+        position.z = 10;
+        _currentPiece.transform.position = position;
+    }
+
+    private bool KingCaptured()
+    {
+        return _capturedPiece is King;
+    }
+
+    private void FinishGame()
+    {
+        _victoryText.SetActive(true);
+
+        _winner.text = _capturedPiece.GetPieceColor() switch
+        {
+            PieceColor.White => "Black",
+            PieceColor.Black => "White",
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        
+        Invoke(nameof(LoadScene), 3f);
+    }
+
+    private void LoadScene()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 }
