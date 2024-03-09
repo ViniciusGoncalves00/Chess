@@ -7,23 +7,15 @@ public class InputManager : MonoBehaviour
     private Platform _platform;
 
     [SerializeField] private Camera _camera;
-    
-    public static Vector3 MousePosition;
+
+    private static Vector3 _mousePosition;
     
     public static bool IsNodeSelected;
     public static Vector2Int NodeSelected;
 
     private void Start()
     {
-        var platform = Application.platform;
-
-        _platform = platform switch
-        {
-            RuntimePlatform.WindowsEditor => Desktop,
-            RuntimePlatform.WindowsPlayer => Desktop,
-            RuntimePlatform.Android => Mobile,
-            _ => Desktop
-        };
+        _platform = Desktop;
     }
         
     private void Update()
@@ -35,8 +27,8 @@ public class InputManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            MousePosition = Input.mousePosition;
-            var ray = _camera.ScreenPointToRay(MousePosition);
+            _mousePosition = Input.mousePosition;
+            var ray = _camera.ScreenPointToRay(_mousePosition);
 
             if (Physics.Raycast(ray, out var hit) && hit.collider.CompareTag("Node"))
             {
@@ -52,10 +44,5 @@ public class InputManager : MonoBehaviour
                 IsNodeSelected = false;
             }
         }
-    }
-
-    private void Mobile()
-    {
-        
     }
 }
